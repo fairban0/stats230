@@ -1,24 +1,25 @@
 export default async function handler(req, res) {
-  const scriptURL = "https://script.google.com/macros/s/AKfycbxPxNpbEnCQUy0wjdQPNrVM2SwrNvjox_VDjxExKKuawpWTEpPGbf4pobgtJOhsDRdC/exec";
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
   }
 
   try {
-    const response = await fetch(scriptURL, {
+    const data = req.body;
+
+    console.log("Received data:", data); // 🔍 Check what data you received
+
+    const response = await fetch("YOUR_GOOGLE_SCRIPT_URL_HERE", {
       method: "POST",
+      body: JSON.stringify(data),
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body),
     });
 
-    if (!response.ok) {
-      throw new Error("Google Apps Script responded with error");
-    }
+    const result = await response.text();
+    console.log("Google Apps Script response:", result);
 
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    console.error("Relay error:", err);
-    return res.status(500).json({ success: false, error: err.message });
+    res.status(200).json({ status: "success" });
+  } catch (error) {
+    console.error("Server error:", error); // 🔥 This will show in Vercel Logs
+    res.status(500).json({ status: "error", message: error.message });
   }
 }
